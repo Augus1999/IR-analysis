@@ -100,7 +100,7 @@ def plot(set1, set2=None, title='', show=True, save=False):
     finally:
         if save:
             address = os.getcwd() + '\\' + title + '.png'
-            plt.savefig(address, dpi=500)
+            plt.savefig(address, dpi=800)
         if show:
             plt.show()
 
