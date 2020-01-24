@@ -51,7 +51,8 @@ def quick_peak_classify(data=None):
             if i in peak_class[typ]:
                 x_data.append(i)
                 y_data.append(tra[key])
-        peak_set[typ] = [x_data, y_data]
+        if len(x_data) != 0:
+            peak_set[typ] = [x_data, y_data]
     return peak_set
 
 
