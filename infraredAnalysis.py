@@ -116,4 +116,4 @@ def peak_data(data, out_file_name):
 
 if __name__ == '__main__':
     print('''\033[1;35mThis is a library file\033[0m
-          作者は　陶念澤だ。''')
+          作者は　AUGUSだ。''')
