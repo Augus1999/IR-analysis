@@ -6,7 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-def _open(open_file_name):
+def data_open(open_file_name):
     data_x = pd.read_csv(open_file_name, usecols=[0])
     data_y = pd.read_csv(open_file_name, usecols=[1])
     data_x = data_x.dropna()
@@ -68,7 +68,7 @@ def quick_peak_classify(data=None):
     return peak_set
 
 
-def plot(set1, set2=None, title='', show=True, save=False):
+def plot(set1, set2=None, title='', show=True, save=False, s_f='.jpg'):
     # set2 is the peaks set.
     colors = {0: 'firebrick', 1: 'pink', 2: 'saddlebrown', 3: 'darkorange', 4: 'gold', 5: 'olivedrab', 6: 'greenyellow',
               7: 'lightgreen', 8: 'plum', 9: 'Magenta', 10: 'Orchid', 11: 'Indigo', 12: 'DarkSlateBlue', 13: 'Navy',
@@ -114,7 +114,7 @@ def plot(set1, set2=None, title='', show=True, save=False):
             figure_.window.showMaximized()
     finally:
         if save:
-            address = os.getcwd() + '\\' + title + '.png'
+            address = os.getcwd() + '\\' + title + s_f
             plt.savefig(address, dpi=800)
         if show:
             plt.show()
