@@ -38,6 +38,7 @@ def peak_find(data, threshold=0.5, min_dist=50):
 
 def quick_peak_classify(data=None):
     # this method is not so accurate.
+    # select all peaks in the functional group range.
     address = os.getcwd() + '\\ir_peak_range_class.pkl'
     with open(address, 'rb') as f:
         peak_class = pickle.load(f)
@@ -47,10 +48,21 @@ def quick_peak_classify(data=None):
     for typ in peak_class:
         x_data = []
         y_data = []
+        a_ = [[], []]
+        b_ = [[], []]
         for key, i in enumerate(fre):
-            if i in peak_class[typ]:
-                x_data.append(i)
-                y_data.append(tra[key])
+            if len(peak_class[typ]) == 1:  # peak_class[typ] = [Interval(u, d)]
+                if i in peak_class[typ][0]:
+                    x_data.append(i)
+                    y_data.append(tra[key])
+            if len(peak_class[typ]) == 2:  # peak_class[typ] = [peak_range1, peak_range2, ...]
+                for key2, j in enumerate(peak_class[typ]):
+                    if i in j:
+                        a_[key2].append(i)
+                        b_[key2].append(tra[key])
+            if len(a_[0]) != 0 and len(a_[1]) != 0:
+                x_data = a_[0] + a_[1]
+                y_data = b_[0] + b_[1]
         if len(x_data) != 0:
             peak_set[typ] = [x_data, y_data]
     return peak_set
@@ -58,11 +70,11 @@ def quick_peak_classify(data=None):
 
 def plot(set1, set2=None, title='', show=True, save=False):
     # set2 is the peaks set.
-    color = {0: 'firebrick', 1: 'pink', 2: 'saddlebrown', 3: 'darkorange', 4: 'gold', 5: 'olivedrab', 6: 'greenyellow',
-             7: 'lightgreen', 8: 'plum', 9: 'Magenta', 10: 'Orchid', 11: 'Indigo', 12: 'DarkSlateBlue', 13: 'Navy',
-             14: 'PowDerBlue', 15: 'Teal', 16: 'MintCream', 17: 'Lavender', 18: 'MediumBlue', 19: 'Chartreuse',
-             20: 'DarkKhaki', 21: 'GoldEnrod', 22: 'BlanchedAlmond', 23: 'Tan', 24: 'IndianRed', 25: 'Gainsboro',
-             26: 'Gray', 27: 'black'}
+    colors = {0: 'firebrick', 1: 'pink', 2: 'saddlebrown', 3: 'darkorange', 4: 'gold', 5: 'olivedrab', 6: 'greenyellow',
+              7: 'lightgreen', 8: 'plum', 9: 'Magenta', 10: 'Orchid', 11: 'Indigo', 12: 'DarkSlateBlue', 13: 'Navy',
+              14: 'PowDerBlue', 15: 'Teal', 16: 'MintCream', 17: 'Lavender', 18: 'MediumBlue', 19: 'Chartreuse',
+              20: 'DarkKhaki', 21: 'GoldEnrod', 22: 'BlanchedAlmond', 23: 'Tan', 24: 'IndianRed', 25: 'Gainsboro',
+              26: 'Gray', 27: 'black'}
     fig = plt.figure(figsize=(20.0, 12.0))
     fig_ = fig.add_subplot(111)
     ax = fig.gca()
@@ -82,7 +94,7 @@ def plot(set1, set2=None, title='', show=True, save=False):
                 # for instance set2 = {'C=O': [x_data, y_data], 'O-H': [x_data, y_data]}
                 x_ = np.array(set2[typ][0])
                 y_ = np.array(set2[typ][1]) - key
-                fig_.scatter(x_, y_, color=color[key], label=typ, marker=6, s=80)
+                fig_.scatter(x_, y_, color=colors[key], label=typ, marker=6, s=80)
     fig_.set_xlabel(r'Wave number (cm$^{-1}$)')  # LaTex
     fig_.set_ylabel('Transmittance (%)')
     fig_.set_xticks(x_tick), fig_.set_yticks(y_tick)
@@ -90,12 +102,15 @@ def plot(set1, set2=None, title='', show=True, save=False):
     fig_.grid(color='black', linestyle=':')
     fig_.legend()
     figure_ = plt.get_current_fig_manager()
-    try:
+    try:  # full-sized the figure.
+        # if back is Qt
         figure_.resize(*figure_.window.maxsize())
     except AttributeError:
         try:
+            # if back is MX
             figure_.frame.Maximized(True)
         except AttributeError:
+            # if back is Tk
             figure_.window.showMaximized()
     finally:
         if save:
@@ -106,6 +121,7 @@ def plot(set1, set2=None, title='', show=True, save=False):
 
 
 def peak_data(data, out_file_name):
+    # export peak data.
     content = 'wave number,transmittance\n'
     for key, data_x in enumerate(data[0]):
         row = str(data_x) + ',' + str(data[1][key]) + '\n'
@@ -115,5 +131,5 @@ def peak_data(data, out_file_name):
 
 
 if __name__ == '__main__':
-    print('''\033[1;35mThis is a library file\033[0m
-          作者は　AUGUSだ。''')
+    print('''\033[1;35mThis is a library file.
+    \033[0;34m作者は　陶念澤だ。\033[0m''')
