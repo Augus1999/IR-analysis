@@ -1,7 +1,7 @@
-from infraredAnalysis import _open, peak_find, quick_peak_classify, plot, peak_data
+from infraredAnalysis import *
 
 
-a = _open('sample.CSV')
+a = data_open('sample.CSV')
 b = peak_find(a, 0.5, 50)
 c = quick_peak_classify(b)
 plot(set1=a, set2=c, title='sample', save=True)
