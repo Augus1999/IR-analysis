@@ -29,6 +29,8 @@ def peak_find(data, threshold=0.5, min_dist=50):
         _x.append(i[0])
     for j in y:
         _y.append(100 - j[0])
+    '''the above codes are used to convert data format 
+    exported from Pandas into a format that can be used in PeakUtils.'''
     indexes = peakutils.indexes(np.array(_y), thres=threshold, min_dist=min_dist)
     for h in indexes:
         x_.append(_x[h])
@@ -63,13 +65,14 @@ def quick_peak_classify(data=None):
             if len(a_[0]) != 0 and len(a_[1]) != 0:
                 x_data = a_[0] + a_[1]
                 y_data = b_[0] + b_[1]
-        if len(x_data) != 0:
+        if len(x_data) != 0:  # give non-empty dictionary only.
             peak_set[typ] = [x_data, y_data]
     return peak_set
 
 
 def plot(set1, set2=None, title='', show=True, save=False, s_f='.jpg'):
     # set2 is the peaks set.
+    # s_f is the format of output file, e.g. '.jpg''.png''.ps''.pdf'.
     colors = {0: 'firebrick', 1: 'pink', 2: 'saddlebrown', 3: 'darkorange', 4: 'gold', 5: 'olivedrab', 6: 'greenyellow',
               7: 'lightgreen', 8: 'plum', 9: 'Magenta', 10: 'Orchid', 11: 'Indigo', 12: 'DarkSlateBlue', 13: 'Navy',
               14: 'PowDerBlue', 15: 'Teal', 16: 'MintCream', 17: 'Lavender', 18: 'MediumBlue', 19: 'Chartreuse',
@@ -89,6 +92,8 @@ def plot(set1, set2=None, title='', show=True, save=False, s_f='.jpg'):
             x_ = set2[0]
             y_ = set2[1]
             fig_.scatter(x_, y_, color='orange', marker=6, s=80)
+            for step, n in enumerate(x_):  # show the wave number of peaks.
+                fig_.text(n, y_[step]-12, n, rotation=90, alpha=0.6, fontstyle='oblique')
         if type(set2) is dict:
             for key, typ in enumerate(set2):
                 # for instance set2 = {'C=O': [x_data, y_data], 'O-H': [x_data, y_data]}
@@ -100,7 +105,8 @@ def plot(set1, set2=None, title='', show=True, save=False, s_f='.jpg'):
     fig_.set_xticks(x_tick), fig_.set_yticks(y_tick)
     fig_.set_title(title)  # title using LaTex.
     fig_.grid(color='black', linestyle=':')
-    fig_.legend()
+    fig_.legend()  # show legend
+    plt.tight_layout()  # tight-show
     figure_ = plt.get_current_fig_manager()
     try:  # full-sized the figure.
         # if backend is Qt
@@ -131,5 +137,7 @@ def peak_data(data, out_file_name):
 
 
 if __name__ == '__main__':
+    from time import sleep
     print('''\033[1;35mThis is a library file.
     \033[0;34m作者は　陶念澤だ。\033[0m''')
+    sleep(2)
