@@ -103,14 +103,14 @@ def plot(set1, set2=None, title='', show=True, save=False, s_f='.jpg'):
     fig_.legend()
     figure_ = plt.get_current_fig_manager()
     try:  # full-sized the figure.
-        # if back is Qt
+        # if backend is Qt
         figure_.resize(*figure_.window.maxsize())
     except AttributeError:
         try:
-            # if back is MX
+            # if backend is WX
             figure_.frame.Maximized(True)
         except AttributeError:
-            # if back is Tk
+            # if backend is Tk
             figure_.window.showMaximized()
     finally:
         if save:
