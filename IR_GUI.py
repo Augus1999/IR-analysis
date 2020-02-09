@@ -60,7 +60,6 @@ if __name__ == '__main__':
         file_name = tk.filedialog.askopenfilename()
         if file_name != '':
             lb.config(text="Selected file："+file_name)
-            # address = input('key in the file address\n>>>')
             address = file_name
             a = data_open(address)
 
