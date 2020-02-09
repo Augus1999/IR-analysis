@@ -1,3 +1,4 @@
+# author@Augus
 import matplotlib
 import tkinter as tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -7,7 +8,6 @@ from infraredAnalysis import *
 
 def _plot(set1, set2=None, title=''):
     # set2 is the selected peaks set.
-    # s_f is the format of output file, e.g. '.jpg''.png''.ps''.pdf'.
     colors = {0: 'firebrick', 1: 'pink', 2: 'saddlebrown', 3: 'darkorange', 4: 'gold', 5: 'olivedrab', 6: 'greenyellow',
               7: 'lightgreen', 8: 'plum', 9: 'Magenta', 10: 'Orchid', 11: 'Indigo', 12: 'DarkSlateBlue', 13: 'Navy',
               14: 'PowDerBlue', 15: 'Teal', 16: 'MintCream', 17: 'Lavender', 18: 'MediumBlue', 19: 'Chartreuse',
@@ -39,7 +39,7 @@ def _plot(set1, set2=None, title=''):
     fig_.set_ylabel('Transmittance (%)')
     fig_.set_xticks(x_tick), fig_.set_yticks(y_tick)
     fig_.tick_params(labelsize=8)
-    fig_.set_title(title)  # title using LaTex.
+    fig_.set_title(title)
     fig_.grid(color='black', linestyle=':')
     fig_.legend()  # show legend
     return fig
