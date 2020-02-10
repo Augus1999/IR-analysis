@@ -1,7 +1,9 @@
 # IR-analysis
 This project is based on numpy, interval, pandas, and peakutils.
 
-Examples see example.py
+Examples of using ```infraredAnalysis.py``` see ```example.py```
+
+ Doubleclickrun ```IR_GUI.py``` will start a GUI application based on ```infraredAnalysis.py``` that can directly show the plot, select parameters and save image.
 
 ![alt text](sample.jpg)
 ![alt text](example.png)
