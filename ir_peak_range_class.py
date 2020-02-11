@@ -31,6 +31,8 @@ range_class['alkene C-H bend'] = [Interval(650, 1000)]
 range_class['aromatic C-H stretch'] = [Interval(3050, 3150)]
 range_class['aromatic C-H bend'] = [Interval(690, 900)]
 range_class['nitro group'] = [Interval(1300, 1390), Interval(1500, 1600)]
+range_class[r'C$\equiv$C'] = [Interval(2100, 2180)]  # (Latex format) carbon carbon triple bond.
+range_class[r'C$\equiv$N'] = [Interval(2150, 2250)]  # (Latex format) carbon nitrogen triple bond.
 print(range_class)
 with open('ir_peak_range_class.pkl', 'wb') as f:
     pickle.dump(range_class, f)
