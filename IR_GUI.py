@@ -1,4 +1,3 @@
-# author@Augus
 import matplotlib
 import tkinter as tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -8,24 +7,17 @@ from infraredAnalysis import *
 
 def _plot(set1, set2=None, title=''):
     # set2 is the selected peaks set.
-    colors = {0: 'firebrick', 1: 'pink', 2: 'saddlebrown', 3: 'darkorange', 4: 'gold', 5: 'olivedrab', 6: 'greenyellow',
-              7: 'lightgreen', 8: 'plum', 9: 'Magenta', 10: 'Orchid', 11: 'Indigo', 12: 'DarkSlateBlue', 13: 'Navy',
-              14: 'PowDerBlue', 15: 'Teal', 16: 'MintCream', 17: 'Lavender', 18: 'MediumBlue', 19: 'Chartreuse',
-              20: 'DarkKhaki', 21: 'GoldEnrod', 22: 'BlanchedAlmond', 23: 'Tan', 24: 'IndianRed', 25: 'Gainsboro',
-              26: 'Gray', 27: 'black'}
     fig = Figure(figsize=(8.0, 5.0))
     fig_ = fig.add_subplot(111)
     ax = fig.gca()
     ax.invert_xaxis()
     x_tick = np.arange(500, 4200, 200)
     y_tick = np.arange(0, 110, 10)
-    x = set1[0]
-    y = set1[1]
+    x, y = set1[0], set1[1]
     fig_.plot(x, y, color='black', label='IR spectrum', linewidth=0.8)
     if set2 is not None:
         if type(set2) is list:
-            x_ = set2[0]
-            y_ = set2[1]
+            x_, y_ = set2[0], set2[1]
             fig_.scatter(x_, y_, color='orange', marker=6, s=30)
             for step, n in enumerate(x_):  # show the wave number of peaks.
                 fig_.text(n, y_[step]-14, n, rotation=90, alpha=0.6, fontsize=8, fontstyle='oblique')
@@ -39,7 +31,7 @@ def _plot(set1, set2=None, title=''):
     fig_.set_ylabel('Transmittance (%)')
     fig_.set_xticks(x_tick), fig_.set_yticks(y_tick)
     fig_.tick_params(labelsize=8)
-    fig_.set_title(title)
+    fig_.set_title(title)  # title using LaTex.
     fig_.grid(color='black', linestyle=':')
     fig_.legend()  # show legend
     return fig
@@ -52,7 +44,7 @@ if __name__ == '__main__':
     root.resizable(width=False, height=False)
     frame = tk.Frame(master=root, height=600, width=850)
     frame.place(x=0, y=0, anchor='nw')
-    lb = tk.Label(master=root, text='', bg='white')
+    lb = tk.Label(master=root, text='')
     lb.place(x=100, y=25, anchor='nw')
 
 
@@ -60,6 +52,7 @@ if __name__ == '__main__':
         file_name = tk.filedialog.askopenfilename()
         if file_name != '':
             lb.config(text="Selected file："+file_name)
+            lb['bg'] = 'white'
             address = file_name
             a = data_open(address)
 
