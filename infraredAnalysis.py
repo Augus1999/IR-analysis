@@ -1,9 +1,34 @@
 import os
 import pickle
-import peakutils
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
+import subprocess as sp
+try:
+    import peakutils
+except ImportError:
+    sp.run('pip install peakutils', shell=True)
+    import peakutils
+try:
+    import numpy as np
+except ImportError:
+    sp.run('pip install numpy', shell=True)
+    import numpy as np
+try:
+    import pandas as pd
+except ImportError:
+    sp.run('pip install pandas', shell=True)
+    import pandas as pd
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    sp.run('pip install matplotlib', shell=True)
+    import matplotlib.pyplot as plt
+
+
+# colormap
+colors = {0: 'firebrick', 1: 'pink', 2: 'saddlebrown', 3: 'darkorange', 4: 'gold', 5: 'olivedrab', 6: 'greenyellow',
+          7: 'lightgreen', 8: 'plum', 9: 'Magenta', 10: 'Orchid', 11: 'Indigo', 12: 'DarkSlateBlue', 13: 'Navy',
+          14: 'PowDerBlue', 15: 'Teal', 16: 'MintCream', 17: 'Lavender', 18: 'MediumBlue', 19: 'Chartreuse',
+          20: 'DarkKhaki', 21: 'GoldEnrod', 22: 'BlanchedAlmond', 23: 'Tan', 24: 'IndianRed', 25: 'Gainsboro',
+          26: 'Gray', 27: 'black'}
 
 
 def data_open(open_file_name):
@@ -19,12 +44,8 @@ def data_open(open_file_name):
 
 
 def peak_find(data, threshold=0.5, min_dist=50):
-    _x = []
-    _y = []
-    x_ = []
-    y_ = []
-    x = data[0]
-    y = data[1]
+    _x, _y, x_, y_ = [], [], [], []
+    x, y = data[0], data[1]
     for i in x:
         _x.append(i[0])
     for j in y:
@@ -44,14 +65,11 @@ def quick_peak_classify(data=None):
     address = os.getcwd() + '\\ir_peak_range_class.pkl'
     with open(address, 'rb') as f:
         peak_class = pickle.load(f)
-    fre = data[0]
-    tra = data[1]
+    fre, tra = data[0], data[1]
     peak_set = {}
     for typ in peak_class:
-        x_data = []
-        y_data = []
-        a_ = [[], []]
-        b_ = [[], []]
+        x_data, y_data = [], []
+        a_, b_ = [[], []], [[], []]
         for key, i in enumerate(fre):
             if len(peak_class[typ]) == 1:  # peak_class[typ] = [Interval(u, d)]
                 if i in peak_class[typ][0]:
@@ -71,21 +89,15 @@ def quick_peak_classify(data=None):
 
 
 def plot(set1, set2=None, title='', show=True, save=False, s_f='.jpg'):
-    # set2 is the peaks set.
+    # set2 is the selected peaks set.
     # s_f is the format of output file, e.g. '.jpg''.png''.ps''.pdf'.
-    colors = {0: 'firebrick', 1: 'pink', 2: 'saddlebrown', 3: 'darkorange', 4: 'gold', 5: 'olivedrab', 6: 'greenyellow',
-              7: 'lightgreen', 8: 'plum', 9: 'Magenta', 10: 'Orchid', 11: 'Indigo', 12: 'DarkSlateBlue', 13: 'Navy',
-              14: 'PowDerBlue', 15: 'Teal', 16: 'MintCream', 17: 'Lavender', 18: 'MediumBlue', 19: 'Chartreuse',
-              20: 'DarkKhaki', 21: 'GoldEnrod', 22: 'BlanchedAlmond', 23: 'Tan', 24: 'IndianRed', 25: 'Gainsboro',
-              26: 'Gray', 27: 'black'}
     fig = plt.figure(figsize=(20.0, 12.0))
     fig_ = fig.add_subplot(111)
     ax = fig.gca()
     ax.invert_xaxis()
     x_tick = np.arange(500, 4200, 200)
     y_tick = np.arange(0, 110, 10)
-    x = set1[0]
-    y = set1[1]
+    x, y = set1[0], set1[1]
     fig_.plot(x, y, color='black', label='IR spectrum')
     if set2 is not None:
         if type(set2) is list:
@@ -106,7 +118,7 @@ def plot(set1, set2=None, title='', show=True, save=False, s_f='.jpg'):
     fig_.set_title(title)  # title using LaTex.
     fig_.grid(color='black', linestyle=':')
     fig_.legend()  # show legend
-    plt.tight_layout()  # tight-show
+    plt.tight_layout()  # Tight-show
     figure_ = plt.get_current_fig_manager()
     try:  # full-sized the figure.
         # if backend is Qt
@@ -134,6 +146,17 @@ def peak_data(data, out_file_name):
         content = content + '{}'.format(row)
     with open(out_file_name, 'w', encoding='utf-8') as f:
         f.write(content)
+
+
+def batch_plot(file_root):
+    # batch save plots
+    for root, dirs, files in os.walk(file_root):
+        for name in files:
+            if name.endswith('.csv') or name.endswith('.CSV'):
+                a = data_open(file_root+'\\'+name)
+                b = peak_find(a)
+                title = name
+                plot(a, b, title=title, show=False, save=True)
 
 
 if __name__ == '__main__':
