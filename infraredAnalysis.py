@@ -1,25 +1,38 @@
 import os
 import pickle
 import subprocess as sp
+# automatically install all libraries needed.
 try:
     import peakutils
 except ImportError:
-    sp.run('pip install peakutils', shell=True)
+    while True:
+        c = sp.call('pip install peakutils', shell=True)
+        if c == 0:
+            break
     import peakutils
 try:
     import numpy as np
 except ImportError:
-    sp.run('pip install numpy', shell=True)
+    while True:
+        c = sp.call('pip install numpy', shell=True)
+        if c == 0:
+            break
     import numpy as np
 try:
     import pandas as pd
 except ImportError:
-    sp.run('pip install pandas', shell=True)
+    while True:
+        c = sp.call('pip install pandas', shell=True)
+        if c == 0:
+            break
     import pandas as pd
 try:
     import matplotlib.pyplot as plt
 except ImportError:
-    sp.run('pip install matplotlib', shell=True)
+    while True:
+        c = sp.call('pip install matplotlib', shell=True)
+        if c == 0:
+            break
     import matplotlib.pyplot as plt
 
 
@@ -30,16 +43,23 @@ colors = {0: 'firebrick', 1: 'pink', 2: 'saddlebrown', 3: 'darkorange', 4: 'gold
           20: 'DarkKhaki', 21: 'GoldEnrod', 22: 'BlanchedAlmond', 23: 'Tan', 24: 'IndianRed', 25: 'Gainsboro',
           26: 'Gray', 27: 'black'}
 
+# TODO(Augus): create a neural network to identify IR peaks.
+
 
 def data_open(open_file_name):
+    """
+    This function only deals with IR output file in csv format
+
+    :param open_file_name: the name of csv file
+    :return: a set of data that can be further used in other functions of infraredAnalysis
+    """
     data_x = pd.read_csv(open_file_name, usecols=[0])
     data_y = pd.read_csv(open_file_name, usecols=[1])
-    data_x = data_x.dropna()
-    data_y = data_y.dropna()
-    x = data_x.values
-    y = data_y.values
-    x = x.astype('float32')
-    y = y.astype('float32')
+    data_x = data_x.apply(pd.to_numeric, errors='coerce').fillna(0.0)
+    data_y = data_y.apply(pd.to_numeric, errors='coerce').fillna(0.0)
+    data_x, data_y = data_x.dropna(), data_y.dropna()
+    x, y = data_x.values, data_y.values
+    x, y = x.astype('float32'), y.astype('float32')
     return [x, y]
 
 
@@ -60,8 +80,13 @@ def peak_find(data, threshold=0.5, min_dist=50):
 
 
 def quick_peak_classify(data=None):
-    # this method is not so accurate.
-    # select all peaks in the functional group range.
+    """
+    This function will select all peaks in the functional group range.
+    Warning: this method is NOT so accurate.
+
+    :param data: IR data exported from peak_find()
+    :return: a set of classified data
+    """
     address = os.getcwd() + '\\ir_peak_range_class.pkl'
     with open(address, 'rb') as f:
         peak_class = pickle.load(f)
@@ -89,8 +114,19 @@ def quick_peak_classify(data=None):
 
 
 def plot(set1, set2=None, title='', show=True, save=False, s_f='.jpg'):
-    # set2 is the selected peaks set.
-    # s_f is the format of output file, e.g. '.jpg''.png''.ps''.pdf'.
+    """
+    This function is used to plot the IR spectra in a specific format.
+
+    :param set1: the IR data exported from data_open();
+    :param set2: the selected-peaks set exported from peak_find() or quick_peak_classify();
+                 if set2 is None, no peak will be marked;
+    :param title: the title of the plot; latex format is necessary;
+    :param show: whether show the image;
+    :param save: whether save the image; the image will be saved at the root file;
+    :param s_f: the format of output file, e.g. '.jpg''.png''.ps''.pdf'.
+    """
+    plt.rcParams['font.sans-serif'] = ['SimHei']  # Chinese label support.
+    plt.rcParams['axes.unicode_minus'] = False  # normal 'negative symbol'
     fig = plt.figure(figsize=(20.0, 12.0))
     fig_ = fig.add_subplot(111)
     ax = fig.gca()
@@ -101,8 +137,7 @@ def plot(set1, set2=None, title='', show=True, save=False, s_f='.jpg'):
     fig_.plot(x, y, color='black', label='IR spectrum')
     if set2 is not None:
         if type(set2) is list:
-            x_ = set2[0]
-            y_ = set2[1]
+            x_, y_ = set2[0], set2[1]
             fig_.scatter(x_, y_, color='orange', marker=6, s=80)
             for step, n in enumerate(x_):  # show the wave number of peaks.
                 fig_.text(n, y_[step]-12, n, rotation=90, alpha=0.6, fontstyle='oblique')
@@ -112,10 +147,10 @@ def plot(set1, set2=None, title='', show=True, save=False, s_f='.jpg'):
                 x_ = np.array(set2[typ][0])
                 y_ = np.array(set2[typ][1]) - key
                 fig_.scatter(x_, y_, color=colors[key], label=typ, marker=6, s=80)
-    fig_.set_xlabel(r'Wave number (cm$^{-1}$)')  # LaTex
+    fig_.set_xlabel(r'Wave number (cm$^{-1}$)')  # LaTex format
     fig_.set_ylabel('Transmittance (%)')
     fig_.set_xticks(x_tick), fig_.set_yticks(y_tick)
-    fig_.set_title(title)  # title using LaTex.
+    fig_.set_title(title)  # title using LaTex format.
     fig_.grid(color='black', linestyle=':')
     fig_.legend()  # show legend
     plt.tight_layout()  # Tight-show
@@ -139,7 +174,12 @@ def plot(set1, set2=None, title='', show=True, save=False, s_f='.jpg'):
 
 
 def peak_data(data, out_file_name):
-    # export peak data.
+    """
+    export peak data in a file such as a csv file.
+
+    :param data: peak data from peak_find()
+    :param out_file_name: the name of exported file, e.g. 'sample_peak.csv'
+    """
     content = 'wave number,transmittance\n'
     for key, data_x in enumerate(data[0]):
         row = str(data_x) + ',' + str(data[1][key]) + '\n'
