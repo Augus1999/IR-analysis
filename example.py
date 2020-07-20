@@ -1,8 +1,8 @@
-from infraredAnalysis import *
+import matplotlib
+from infraredAnalysis import Frame
+matplotlib.use('Qt5Agg')
 
 
-a = data_open('sample and results\\sample.CSV')
-b = peak_find(a, 0.5, 50)
-c = quick_peak_classify(b)
-plot(set1=a, set2=c, title='sample', save=True)
-peak_data(b, 'peak.csv')
+a = Frame(r'sample and results\benzoic acid.CSV')
+a.plot(title='sample', select=1)
+a.print('peak.csv')

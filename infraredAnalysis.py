@@ -189,7 +189,11 @@ def peak_data(data, out_file_name):
 
 
 def batch_plot(file_root):
-    # batch save plots
+    """
+    batch save plots.
+
+    :param file_root: the root where wanted files exist
+    """
     for root, dirs, files in os.walk(file_root):
         for name in files:
             if name.endswith('.csv') or name.endswith('.CSV'):
@@ -197,6 +201,31 @@ def batch_plot(file_root):
                 b = peak_find(a)
                 title = name
                 plot(a, b, title=title, show=False, save=True)
+
+
+class Frame:
+    def __init__(self, open_file_name, threshold=0.5, min_dist=50):
+        self.data = data_open(open_file_name)
+        self.peak = peak_find(self.data, threshold, min_dist)
+        self.classify = quick_peak_classify(self.peak)
+
+    def plot(self, title='', select=0):
+        """
+
+        :param title: the title of the plot; LaTex supported.
+        :param select: select=0 -> no peaks shown;
+                       select=1 -> only peaks shown;
+                       select=2 -> show classified results.
+        """
+        if select == 0:
+            plot(self.data, set2=None, title=title, show=True)
+        if select == 1:
+            plot(self.data, set2=self.peak, title=title, show=True)
+        if select == 2:
+            plot(self.data, set2=self.classify, title=title, show=True)
+
+    def print(self, out_file_name):
+        peak_data(self.peak, out_file_name)
 
 
 if __name__ == '__main__':
