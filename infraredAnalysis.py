@@ -1,39 +1,5 @@
-import os
-import pickle
-import subprocess as sp
-# automatically install all libraries needed.
-try:
-    import peakutils
-except ImportError:
-    while True:
-        c = sp.call('pip install peakutils', shell=True)
-        if c == 0:
-            break
-    import peakutils
-try:
-    import numpy as np
-except ImportError:
-    while True:
-        c = sp.call('pip install numpy', shell=True)
-        if c == 0:
-            break
-    import numpy as np
-try:
-    import pandas as pd
-except ImportError:
-    while True:
-        c = sp.call('pip install pandas', shell=True)
-        if c == 0:
-            break
-    import pandas as pd
-try:
-    import matplotlib.pyplot as plt
-except ImportError:
-    while True:
-        c = sp.call('pip install matplotlib', shell=True)
-        if c == 0:
-            break
-    import matplotlib.pyplot as plt
+from __init__ import *
+from classes import range_class
 
 
 # colormap
@@ -87,21 +53,18 @@ def quick_peak_classify(data=None):
     :param data: IR data exported from peak_find()
     :return: a set of classified data
     """
-    address = os.getcwd() + '\\ir_peak_range_class.pkl'
-    with open(address, 'rb') as f:
-        peak_class = pickle.load(f)
     fre, tra = data[0], data[1]
     peak_set = {}
-    for typ in peak_class:
+    for typ in range_class:
         x_data, y_data = [], []
         a_, b_ = [[], []], [[], []]
         for key, i in enumerate(fre):
-            if len(peak_class[typ]) == 1:  # peak_class[typ] = [Interval(u, d)]
-                if i in peak_class[typ][0]:
+            if len(range_class[typ]) == 1:  # peak_class[typ] = [Interval(u, d)]
+                if i in range_class[typ][0]:
                     x_data.append(i)
                     y_data.append(tra[key])
-            if len(peak_class[typ]) == 2:  # peak_class[typ] = [peak_range1, peak_range2, ...]
-                for key2, j in enumerate(peak_class[typ]):
+            if len(range_class[typ]) == 2:  # peak_class[typ] = [peak_range1, peak_range2, ...]
+                for key2, j in enumerate(range_class[typ]):
                     if i in j:
                         a_[key2].append(i)
                         b_[key2].append(tra[key])
@@ -127,7 +90,7 @@ def plot(set1, set2=None, title='', show=True, save=False, s_f='.jpg'):
     """
     plt.rcParams['font.sans-serif'] = ['SimHei']  # Chinese label support.
     plt.rcParams['axes.unicode_minus'] = False  # normal 'negative symbol'
-    fig = plt.figure(figsize=(20.0, 12.0))
+    fig = plt.figure(figsize=(20.0, 11.0))
     fig_ = fig.add_subplot(111)
     ax = fig.gca()
     ax.invert_xaxis()
@@ -155,21 +118,22 @@ def plot(set1, set2=None, title='', show=True, save=False, s_f='.jpg'):
     fig_.legend()  # show legend
     plt.tight_layout()  # Tight-show
     figure_ = plt.get_current_fig_manager()
-    try:  # full-sized the figure.
-        # if backend is Qt
-        figure_.resize(*figure_.window.maxsize())
-    except AttributeError:
-        try:
-            # if backend is WX
-            figure_.frame.Maximized(True)
+    if save:
+        address = os.getcwd() + '\\' + title + s_f
+        plt.savefig(address, dpi=800)
+        plt.close()
+    if show:
+        try:  # full-sized the figure.
+            # if backend is Qt
+            figure_.resize(*figure_.window.maxsize())
         except AttributeError:
-            # if backend is Tk
-            figure_.window.showMaximized()
-    finally:
-        if save:
-            address = os.getcwd() + '\\' + title + s_f
-            plt.savefig(address, dpi=800)
-        if show:
+            try:
+                # if backend is WX
+                figure_.frame.Maximized(True)
+            except AttributeError:
+                # if backend is Tk
+                figure_.window.showMaximized()
+        finally:
             plt.show()
 
 
@@ -194,13 +158,22 @@ def batch_plot(file_root):
 
     :param file_root: the root where wanted files exist
     """
+    def save(file_name):
+        data = data_open(file_name)
+        peaks = peak_find(data)
+        title = file_name.split('\\')[-1]
+        plot(data, peaks, title=title, show=False, save=True)
+
+    queue = []
     for root, dirs, files in os.walk(file_root):
         for name in files:
             if name.endswith('.csv') or name.endswith('.CSV'):
-                a = data_open(file_root+'\\'+name)
-                b = peak_find(a)
-                title = name
-                plot(a, b, title=title, show=False, save=True)
+                queue.append(file_root+'\\'+name)
+    for item in queue:
+        thread = threading.Thread(target=save, args=(item,))
+        thread.start()
+        thread.join()
+        # save(item)
 
 
 class Frame:
@@ -208,28 +181,25 @@ class Frame:
         self.data = data_open(open_file_name)
         self.peak = peak_find(self.data, threshold, min_dist)
         self.classify = quick_peak_classify(self.peak)
+        self.select = [None, self.peak, self.classify]
 
-    def plot(self, title='', select=0):
+    def plot(self, title='', select=0, save=False):
         """
 
+        :param save: whether auto-save this plot.
         :param title: the title of the plot; LaTex supported.
         :param select: select=0 -> no peaks shown;
                        select=1 -> only peaks shown;
                        select=2 -> show classified results.
         """
-        if select == 0:
-            plot(self.data, set2=None, title=title, show=True)
-        if select == 1:
-            plot(self.data, set2=self.peak, title=title, show=True)
-        if select == 2:
-            plot(self.data, set2=self.classify, title=title, show=True)
+        plot(self.data, set2=self.select[select], title=title, show=True, save=save)
 
     def print(self, out_file_name):
-        peak_data(self.peak, out_file_name)
+        peak_data(self.peak, out_file_name=out_file_name)
 
 
 if __name__ == '__main__':
     from time import sleep
     print('''\033[1;35mThis is a library file.
-    \033[0;34m作者は　陶念澤だ。\033[0m''')
+    \033[0;34m作者は陶念澤なのである。\033[0m''')
     sleep(2)
