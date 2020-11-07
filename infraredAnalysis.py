@@ -1,7 +1,13 @@
+# -*- coding: utf-8 -*-
 from __init__ import *
 from classes import range_class
 
 
+"""
+Note: the size of words in the output figure will be affected by
+      the scaling set in Windows. Scaling from 100% to 140% looks
+      the same; >= 150% will make the figure look weird.
+"""
 # colormap
 colors = {0: 'firebrick', 1: 'pink', 2: 'saddlebrown', 3: 'darkorange', 4: 'gold', 5: 'olivedrab', 6: 'greenyellow',
           7: 'lightgreen', 8: 'plum', 9: 'Magenta', 10: 'Orchid', 11: 'Indigo', 12: 'DarkSlateBlue', 13: 'Navy',
@@ -50,7 +56,7 @@ def quick_peak_classify(data=None):
     This function will select all peaks in the functional group range.
     Warning: this method is NOT so accurate.
 
-    :param data: IR data exported from peak_find()
+    :param data: IR data exported from peak_find(.)
     :return: a set of classified data
     """
     fre, tra = data[0], data[1]
@@ -63,7 +69,7 @@ def quick_peak_classify(data=None):
                 if i in range_class[typ][0]:
                     x_data.append(i)
                     y_data.append(tra[key])
-            if len(range_class[typ]) == 2:  # peak_class[typ] = [peak_range1, peak_range2, ...]
+            if len(range_class[typ]) >= 2:  # peak_class[typ] = [peak_range1, peak_range2, ...]
                 for key2, j in enumerate(range_class[typ]):
                     if i in j:
                         a_[key2].append(i)
@@ -76,19 +82,20 @@ def quick_peak_classify(data=None):
     return peak_set
 
 
-def plot(set1, set2=None, title='', show=True, save=False, s_f='.jpg'):
+def plot(set1, set2=None, title='', show=True, save=False, out_dir=None, s_f='.jpg'):
     """
     This function is used to plot the IR spectra in a specific format.
 
-    :param set1: the IR data exported from data_open();
-    :param set2: the selected-peaks set exported from peak_find() or quick_peak_classify();
+    :param set1: the IR data exported from data_open(.);
+    :param set2: the selected-peaks set exported from peak_find(.) or quick_peak_classify(.);
                  if set2 is None, no peak will be marked;
     :param title: the title of the plot; latex format is necessary;
     :param show: whether show the image;
     :param save: whether save the image; the image will be saved at the root file;
+    :param out_dir: where to save the image; set None is the defeat root;
     :param s_f: the format of output file, e.g. '.jpg''.png''.ps''.pdf'.
     """
-    plt.rcParams['font.sans-serif'] = ['SimHei']  # Chinese label support.
+    plt.rcParams['font.sans-serif'] = ['SimHei']  # Chinese and Japanese label support.
     plt.rcParams['axes.unicode_minus'] = False  # normal 'negative symbol'
     fig = plt.figure(figsize=(20.0, 11.0))
     fig_ = fig.add_subplot(111)
@@ -118,9 +125,12 @@ def plot(set1, set2=None, title='', show=True, save=False, s_f='.jpg'):
     fig_.legend()  # show legend
     plt.tight_layout()  # Tight-show
     figure_ = plt.get_current_fig_manager()
+    if out_dir is None:
+        _address = os.getcwd() + '\\' + title[:-4] + s_f
+    if out_dir is not None:
+        _address = out_dir + '\\' + title[:-4] + s_f
     if save:
-        address = os.getcwd() + '\\' + title + s_f
-        plt.savefig(address, dpi=800)
+        plt.savefig(_address, dpi=800)  # ignore the warning here
         plt.close()
     if show:
         try:  # full-sized the figure.
@@ -141,7 +151,7 @@ def peak_data(data, out_file_name):
     """
     export peak data in a file such as a csv file.
 
-    :param data: peak data from peak_find()
+    :param data: peak data from peak_find(.)
     :param out_file_name: the name of exported file, e.g. 'sample_peak.csv'
     """
     content = 'wave number,transmittance\n'
@@ -162,7 +172,7 @@ def batch_plot(file_root):
         data = data_open(file_name)
         peaks = peak_find(data)
         title = file_name.split('\\')[-1]
-        plot(data, peaks, title=title, show=False, save=True)
+        plot(data, peaks, title=title, show=False, save=True, out_dir=file_root)
 
     queue = []
     for root, dirs, files in os.walk(file_root):
@@ -170,10 +180,16 @@ def batch_plot(file_root):
             if name.endswith('.csv') or name.endswith('.CSV'):
                 queue.append(file_root+'\\'+name)
     for item in queue:
+        """
+        when use multithreading, the console might give the following warning:
+         UserWarning: Starting a Matplotlib GUI outside of the main thread will likely fail.
+        ignore this warning if figures are correctly created in the root (this may require 
+        Python >= 3.8.3 and Matplotlib >= 3.3.2).
+        """
         thread = threading.Thread(target=save, args=(item,))
         thread.start()
-        thread.join()
-        # save(item)
+        thread.join()  # do not use these under Python < 3.8.3
+        # save(item)  # do not use this if the above lines are hot.
 
 
 class Frame:
@@ -201,5 +217,5 @@ class Frame:
 if __name__ == '__main__':
     from time import sleep
     print('''\033[1;35mThis is a library file.
-    \033[0;34m作者は陶念澤なのである。\033[0m''')
+    \033[0;34mオーサーは陶念澤なのである。\033[0m''')
     sleep(2)
