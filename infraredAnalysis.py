@@ -82,22 +82,26 @@ def quick_peak_classify(data=None):
     return peak_set
 
 
-def plot(set1, set2=None, title='', show=True, save=False, out_dir=None, s_f='.jpg'):
+def plot(set1, set2=None, fig_size=(20.0, 11.0),
+         title='', show=True, save=False,
+         out_dir=None, s_f='.jpg', ret=False):
     """
     This function is used to plot the IR spectra in a specific format.
 
     :param set1: the IR data exported from data_open(.);
     :param set2: the selected-peaks set exported from peak_find(.) or quick_peak_classify(.);
                  if set2 is None, no peak will be marked;
+    :param fig_size: the size of the figure;
     :param title: the title of the plot; latex format is necessary;
     :param show: whether show the image;
     :param save: whether save the image; the image will be saved at the root file;
     :param out_dir: where to save the image; set None is the defeat root;
-    :param s_f: the format of output file, e.g. '.jpg''.png''.ps''.pdf'.
+    :param s_f: the format of output file, e.g. '.jpg''.png''.ps''.pdf';
+    :param ret: whether return plt.figure(.).
     """
     plt.rcParams['font.sans-serif'] = ['SimHei']  # Chinese and Japanese label support.
     plt.rcParams['axes.unicode_minus'] = False  # normal 'negative symbol'
-    fig = plt.figure(figsize=(20.0, 11.0))
+    fig = plt.figure(figsize=fig_size)
     fig_ = fig.add_subplot(111)
     ax = fig.gca()
     ax.invert_xaxis()
@@ -145,6 +149,8 @@ def plot(set1, set2=None, title='', show=True, save=False, out_dir=None, s_f='.j
                 figure_.window.showMaximized()
         finally:
             plt.show()
+    if ret:
+        return fig
 
 
 def peak_data(data, out_file_name):

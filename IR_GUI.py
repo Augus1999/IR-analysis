@@ -1,40 +1,9 @@
+# -*- coding: utf-8 -*-
+# Author: TAO Nianze (Augus)
 import matplotlib
 import tkinter as tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.figure import Figure
-from infraredAnalysis import *
-
-
-def _plot(set1, set2=None, title=''):
-    # set2 is the selected peaks set.
-    fig = Figure(figsize=(8.0, 5.0))
-    fig_ = fig.add_subplot(111)
-    ax = fig.gca()
-    ax.invert_xaxis()
-    x_tick = np.arange(500, 4200, 200)
-    y_tick = np.arange(0, 110, 10)
-    x, y = set1[0], set1[1]
-    fig_.plot(x, y, color='black', label='IR spectrum', linewidth=0.8)
-    if set2 is not None:
-        if type(set2) is list:
-            x_, y_ = set2[0], set2[1]
-            fig_.scatter(x_, y_, color='orange', marker=6, s=30)
-            for step, n in enumerate(x_):  # show the wave number of peaks.
-                fig_.text(n, y_[step]-14, n, rotation=90, alpha=0.6, fontsize=8, fontstyle='oblique')
-        if type(set2) is dict:
-            for key, typ in enumerate(set2):
-                # for instance set2 = {'C=O': [x_data, y_data], 'O-H': [x_data, y_data]}
-                x_ = np.array(set2[typ][0])
-                y_ = np.array(set2[typ][1]) - key
-                fig_.scatter(x_, y_, color=colors[key], label=typ, marker=6, s=30)
-    fig_.set_xlabel(r'Wave number (cm$^{-1}$)')  # LaTex
-    fig_.set_ylabel('Transmittance (%)')
-    fig_.set_xticks(x_tick), fig_.set_yticks(y_tick)
-    fig_.tick_params(labelsize=8)
-    fig_.set_title(title)  # title using LaTex.
-    fig_.grid(color='black', linestyle=':')
-    fig_.legend()  # show legend
-    return fig
+from infraredAnalysis import data_open, peak_find, quick_peak_classify, plot
 
 
 if __name__ == '__main__':
@@ -49,7 +18,7 @@ if __name__ == '__main__':
 
 
     def choose_file():
-        file_name = tk.filedialog.askopenfilename()
+        file_name = tk.filedialog.askopenfilename(filetypes=[('CSV', '.csv')])
         if file_name != '':
             lb.config(text="Selected file："+file_name)
             lb['bg'] = 'white'
@@ -75,7 +44,8 @@ if __name__ == '__main__':
                 plt_.rcParams['font.sans-serif'] = ['SimHei']
                 # show plot in tkinter window.
                 b = choose(a)
-                fig__ = _plot(a, b, address)
+                fig__ = plot(a, b, fig_size=(8.0, 5.0), title=address,
+                             show=False, save=False, ret=True)
                 canvas = FigureCanvasTkAgg(fig__, master=frame)
                 canvas.get_tk_widget().place(x=22, y=10, anchor='nw')
 
